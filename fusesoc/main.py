@@ -183,6 +183,7 @@ def run_backend(tool_type, export, do_configure, do_build, do_run, flags, system
         run_error   = "Failed to program the FPGA"
 
     core = _get_core(system)
+    flags['mor1kx_monitor'] = True
     tool = core.get_tool(flags)
     if not tool:
         logger.error(tool_error.format(system))
