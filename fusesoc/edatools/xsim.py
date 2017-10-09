@@ -67,10 +67,11 @@ class Xsim(Simulator):
         if len(xci_ip)>0:
             tcl_file = open(os.path.join(self.work_root, 'xci_sim.tcl'), 'w')
             ipconfig = 'create_project ' + self.name + '_xci_sim\n'
-            ipconfig += 'set_property \"simulator_language\" \"Mixed\" [current_project]\n'
+            #  ipconfig += 'set_property \"simulator_language\" \"Mixed\" [current_project]\n'
             ipconfig += '\n'.join(['read_ip '+s for s in xci_ip])+'\n'
             ipconfig += 'upgrade_ip [get_ips]\n'
-            ipconfig += '\n'.join(['generate_target all [get_files '+ s +']' for s in xci_ip]) + '\n'
+            ipconfig += '\n'.join(['set_property GENERATE_SYNTH_CHECKPOINT true [get_files ' + s + ']' for s in xci_ip]) + '\n'
+            ipconfig += 'generate_target all [get_ips]\n'
             ipconfig += '\n'.join(['export_ip_user_files -of_objects [get_files '+ s +'] -no_script -ip_user_files_dir '+ self.work_root + ' -force -quiet' for s in xci_ip]) + '\n'
             ipconfig += '\n'.join(['create_ip_run [get_files ' + s + ']' for s in xci_ip]) + '\n'
             ipconfig += '\n'.join(['launch_runs ' +os.path.splitext(os.path.basename(s))[0]+'_synth_1' for s in xci_ip]) + '\n'
@@ -78,13 +79,12 @@ class Xsim(Simulator):
             ipconfig += '\n'.join(['export_simulation -directory . -simulator xsim -of_objects [get_files '+ s +'] -ip_user_files_dir . -force -quiet' for s in xci_ip])
             tcl_file.write(ipconfig)
 
-            Launcher('vivado', ['-mode', 'batch', '-source', tcl_file_name],
-                               shell=platform.system() == 'Windows',
-                               cwd = self.work_root,
-                               errormsg = "Failed to generate IP products").run()
-
-
     def build_main(self):
+
+        Launcher('vivado', ['-mode', 'batch', '-source', 'xci_sim.tcl'],
+                           shell=platform.system() == 'Windows',
+                           cwd = self.work_root,
+                           errormsg = "Failed to generate IP products").run()
 
         # process IP products and design files with 'xvlog' and 'xvhdl'
         (src_files, self.incdirs) = self._get_fileset_files()
