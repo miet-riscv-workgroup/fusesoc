@@ -50,17 +50,28 @@ def get_synth(tool, core, export=False):
 
 def get_backend(core, flags, export):
     import os.path
+    import tempfile
+    import yaml
     from fusesoc.config import Config
     from fusesoc.coremanager import CoreManager
     from fusesoc.main import _import
 
-    eda_api = CoreManager().get_eda_api(core.name, flags)
-    export_root = os.path.join(Config().build_root, core.name.sanitized_name, 'src')
+    if export:
+        export_root = os.path.join(Config().build_root, core.name.sanitized_name, 'src')
+    else:
+        export_root = None
     work_root   = os.path.join(Config().build_root,
                                core.name.sanitized_name,
                                core.get_work_root(flags))
-    CoreManager().setup(core.name, flags, export=export, export_root=export_root)
-    return _import(flags['tool'])(eda_api=eda_api, work_root=work_root)
+    if not os.path.exists(work_root):
+        os.makedirs(work_root)
+    eda_api = CoreManager().setup(core.name, flags, work_root, export_root)
+
+    (h, eda_api_file) = tempfile.mkstemp()
+    with open(eda_api_file,'w') as f:
+        f.write(yaml.dump(eda_api))
+
+    return _import(flags['tool'])(eda_api_file=eda_api_file, work_root=work_root)
 
 cmdlineargs = ' --cmdlinearg_bool --cmdlinearg_int=42 --cmdlinearg_str=hello'.split()
 plusargs    = ' --plusarg_bool --plusarg_int=42 --plusarg_str=hello'.split()

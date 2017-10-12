@@ -95,14 +95,19 @@ class Core:
         self.simulators = self.main.simulators
 
         if self.main.backend:
-            self.backend = getattr(self, self.main.backend)
+            try:
+                self.backend = getattr(self, self.main.backend)
+            except AttributeError:
+                raise SyntaxError('Invalid backend "{}"'.format(self.main.backend))
 
         self._collect_filesets()
 
         cache_root = os.path.join(Config().cache_root, self.sanitized_name)
         if config.has_section('plusargs'):
-            logger.warning("plusargs section is deprecated and will not be parsed by FuseSoC. Please migrate to parameters in " + str(self.name))
+            self._warning("plusargs section is deprecated and will not be parsed by FuseSoC. Please migrate to parameters")
             self.plusargs = Plusargs(dict(config.items('plusargs')))
+        if config.has_section('verilator') and config.has_option('verilator', 'define_files'):
+            self._warning("verilator define_files are deprecated")
         if config.has_section('provider'):
             items    = dict(config.items('provider'))
             patch_root = os.path.join(self.core_root, 'patches')
@@ -392,6 +397,8 @@ class Core:
                 _files += _append_files(_b.sdc_files, 'SDC')
                 _files += _append_files(_b.tcl_files, 'tclSource')
                 del(_b.qsys_files)
+                del(_b.sdc_files)
+                del(_b.tcl_files)
             if _files:
                 self.file_sets.append(FileSet(name = "backend_files",
                                               file = _files,
@@ -424,6 +431,9 @@ class Core:
     def _debug(self, msg):
         logger.debug("{} : {}".format(str(self.name), msg))
 
+    def _warning(self, msg):
+        logger.warning("{} : {}".format(str(self.name), msg))
+
     def _parse_component(self, component_file):
         component_dir = os.path.dirname(component_file)
         component = Component()
@@ -445,6 +455,7 @@ class Core:
                 else:
                     f.is_include_file = False
                 f.logical_name = f.logicalName
+                f.copyto = ""
             #FIXME: Handle duplicates. Resolution function? (merge/replace, prio ipxact/core)
             _taken = False
             for fs in self.file_sets:

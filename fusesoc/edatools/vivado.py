@@ -52,7 +52,6 @@ class Vivado(Backend):
         vhdl = []           # VHDL files
         hasVhdl2008 = False # Has VHDL 2008 files
         tcl = []            # TCL files to include
-        dat = []            # DAT files to include
 
         ipconfig = ""
 
@@ -75,9 +74,8 @@ class Vivado(Backend):
                 vhdl.append(params+s.name)
             elif s.file_type.startswith('tclSource'):
                 tcl.append(s.name)
-            elif s.file_type.startswith('dat'):
-                dat.append(s.name)
-
+            elif s.file_type == 'user':
+                pass
 
         tcl_file = open(os.path.join(self.work_root, self.name+".tcl"), 'w')
 
@@ -116,8 +114,7 @@ class Vivado(Backend):
             src_files    = '\n'.join(['read_verilog '+s for s in verilog]+
                                      ['read_verilog -sv '+s for s in sverilog]+
                                      ['read_vhdl '+s for s in vhdl]),
-            xdc_files    = '\n'.join(['read_xdc '+s for s in constr]),
-            dat_files    = '\n'.join(['add_files '+s for s in dat])))
+            xdc_files    = '\n'.join(['read_xdc '+s for s in constr])))
 
         tcl_file.close()
 
@@ -169,8 +166,6 @@ set_property "simulator_language" "Mixed" [current_project]
 {ip}
 
 {src_files}
-
-{dat_files}
 
 {parameters}
 
