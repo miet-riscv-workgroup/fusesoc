@@ -78,13 +78,12 @@ class Xsim(Simulator):
             ipconfig += '\n'.join(['export_simulation -directory . -simulator xsim -of_objects [get_files '+ s +'] -ip_user_files_dir . -force -quiet' for s in xci_ip])
             tcl_file.write(ipconfig)
 
-            Launcher('vivado', ['-mode', 'batch', '-source', tcl_file_name],
-                               shell=platform.system() == 'Windows',
-                               cwd = self.work_root,
-                               errormsg = "Failed to generate IP products").run()
-
-
     def build_main(self):
+
+        Launcher('vivado', ['-mode', 'batch', '-source', 'xci_sim.tcl'],
+                           shell=platform.system() == 'Windows',
+                           cwd = self.work_root,
+                           errormsg = "Failed to generate IP products").run()
 
         # process IP products and design files with 'xvlog' and 'xvhdl'
         (src_files, self.incdirs) = self._get_fileset_files()
