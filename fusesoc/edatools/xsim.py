@@ -51,6 +51,7 @@ class Xsim(Simulator):
         f2 = open(os.path.join(self.work_root,tcl_file),'w')
         f2.write('add_wave -radix hex /\n')
         f2.write('run all\n')
+        f2.write('exit\n')
         f2.close()
 
     def _generate_xci_sim_scripts(self):
@@ -169,7 +170,7 @@ class Xsim(Simulator):
 
         #FIXME: Handle failures. Save stdout/stderr.
         args = []
-        args += ['--gui']                                 # Interactive
+        #  args += ['--gui']                                 # Interactive
         args += ['--tclbatch', 'xsim.tcl']                 # Simulation commands
         args += ['--log', 'xsim.log']                      # Log file
         args += ['--wdb', 'xsim.wdb']                      # Simulation waveforms database
