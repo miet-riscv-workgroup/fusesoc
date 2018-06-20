@@ -76,7 +76,8 @@ class Xsim(Simulator):
             ipconfig += '\n'.join(['create_ip_run [get_files ' + s + ']' for s in xci_ip]) + '\n'
             ipconfig += '\n'.join(['launch_runs ' +os.path.splitext(os.path.basename(s))[0]+'_synth_1' for s in xci_ip]) + '\n'
             ipconfig += '\n'.join(['wait_on_run '+os.path.splitext(os.path.basename(s))[0]+'_synth_1' for s in xci_ip]) + '\n'
-            ipconfig += '\n'.join(['export_simulation -directory . -simulator xsim -of_objects [get_files '+ s +'] -ip_user_files_dir . -force -quiet' for s in xci_ip])
+            #ipconfig += '\n'.join(['export_simulation -directory . -simulator xsim -of_objects [get_files '+ s +'] -ip_user_files_dir . -force -quiet' for s in xci_ip])
+            ipconfig += '\n'.join(['export_simulation -directory ' +os.path.join(self.work_root, self.name + '_xci_sim.ip_user_files')+' -simulator xsim -of_objects [get_files '+ s +'] -force -quiet' for s in xci_ip])
             tcl_file.write(ipconfig)
 
     def build_main(self):
@@ -137,8 +138,8 @@ class Xsim(Simulator):
         libs=[]
         for src_file in src_files:
             if src_file.file_type == 'xci':
-                ip_name = os.path.splitext(os.path.basename(src_file.name))[0]
-                ini_file = os.path.join(self.work_root, ip_name ,'xsim' , 'xsim.ini')
+                ip_dir = os.path.split(os.path.dirname(src_file.name))[1]
+                ini_file = os.path.join(self.work_root,self.name + '_xci_sim.ip_user_files', ip_dir ,'xsim' , 'xsim.ini')
                 with open(ini_file, 'r') as f:
                     for line in f:
                         lib_name = line.split('=')[0]
