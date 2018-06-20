@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 from fusesoc.utils import Launcher
 logger = logging.getLogger(__name__)
 
@@ -9,9 +10,9 @@ class Provider(object):
         self.core_root = core_root
         self.files_root = files_root
 
-        self.cachable = True
-        if 'cachable' in config:
-            self.cachable = not (config.get('cachable') == 'false')
+        self.cacheable = True
+        if 'cacheable' in config:
+            self.cacheable = not (config.get('cacheable') == 'false')
         if 'patches' in config:
             self.patches = config['patches']
         else:
@@ -51,7 +52,7 @@ class Provider(object):
                     raise RuntimeError("Failed to call 'git' for patching core")
 
     def status(self):
-        if not self.cachable:
+        if not self.cacheable:
             return 'outofdate'
         if not os.path.isdir(self.files_root):
             return 'empty'
