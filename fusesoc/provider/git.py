@@ -1,5 +1,6 @@
 import logging
 import shutil
+import os
 from fusesoc.provider.provider import Provider
 from fusesoc.utils import Launcher
 
@@ -17,7 +18,7 @@ class Git(Provider):
         repo   = self.config.get('repo')
         logger.info("Checking out " + repo + " to " + local_dir)
         args = ['clone', '-q', repo, local_dir]
-        Launcher('git', args).run()
+        Launcher('git', args, env=os.environ.copy()).run()
         if version:
             args = ['-C', local_dir, 'checkout', '-q', version]
             Launcher('git', args).run()

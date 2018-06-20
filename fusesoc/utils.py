@@ -1,15 +1,17 @@
 import subprocess
 import logging
 import sys
+import os
 from fusesoc.config import Config
 
 if sys.version[0] == '2':
     FileNotFoundError = OSError
 
 logger = logging.getLogger(__name__)
+os_env = os.environ.copy()
 
 class Launcher:
-    def __init__(self, cmd, args=[], shell=False, cwd=None, stderr=None, stdout=None, errormsg=None, env=None):
+    def __init__(self, cmd, args=[], shell=False, cwd=None, stderr=None, stdout=None, errormsg=None, env=os_env):
         self.cmd      = cmd
         self.args     = args
         self.shell    = shell
